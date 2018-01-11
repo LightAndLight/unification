@@ -4,7 +4,7 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = import ./equiv-test.nix;
+  f = import ./unification.nix;
 
   haskellPackages = if compiler == "default"
                        then pkgs.haskellPackages

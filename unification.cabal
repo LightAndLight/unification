@@ -13,7 +13,8 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Control.Monad.Unify, Control.Lens.Plated1
-  build-depends:       base >=4.9 && <4.10, equivalence, mtl, lens
+  exposed-modules:     Control.Monad.Unify
+                     , Control.Lens.Plated1
+  build-depends:       base >=4.9 && <4.10, equivalence, mtl, lens, deriving-compat
   hs-source-dirs:      src
   default-language:    Haskell2010

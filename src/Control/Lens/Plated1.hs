@@ -1,5 +1,11 @@
 {-# language RankNTypes #-}
 {-# language FlexibleInstances #-}
+
+-- | @lens@'s 'Plated' class lifted to unary type constructors.
+--
+-- These combinators behave exactly the same as their unlifted counterparts
+--
+-- See [Control.Lens.Plated](https://hackage.haskell.org/package/lens/docs/Control-Lens-Plated.html) for documentation
 module Control.Lens.Plated1 where
 
 import Control.Applicative

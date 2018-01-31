@@ -13,8 +13,9 @@
 {-# language TypeFamilies #-}
 {-# language UndecidableInstances #-}
 module Control.Monad.Unify
-  ( -- * Monad
-    UnifyT
+  ( module Control.Lens.Plated1
+    -- * Monad
+  , UnifyT
   , runUnifyT
   , UVar
   , UTerm

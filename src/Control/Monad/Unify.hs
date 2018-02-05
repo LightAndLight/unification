@@ -57,11 +57,18 @@ newtype UVar = UVar Int deriving (Eq, Show, Ord)
 -- | Unification terms. Convert terms into unification terms using 'unfreeze',
 -- and convert unification terms back into regular terms using 'freeze'
 newtype UTerm t v = UTerm { getUTerm :: Compose t (Either UVar) v }
-  deriving (Eq, Show, Ord, Functor, Foldable, Traversable)
+  deriving (Eq, Show, Ord, Functor, Foldable, Traversable, Applicative)
 deriveEq1 ''UTerm
 deriveShow1 ''UTerm
 deriveOrd1 ''UTerm
 makeWrapped ''UTerm
+
+instance Monad t => Monad (UTerm t) where
+  UTerm (Compose u) >>= f = UTerm . Compose $ do
+    u' <- u
+    case u' of
+      Left e -> pure $ Left e
+      Right a -> getCompose . getUTerm $ f a
 
 -- | 'Iso'' on 'UTerm's.
 --
@@ -151,14 +158,14 @@ fresh = UnifyT $ do
 -- | Unify two terms
 unify
   :: ( AsVar t
-      , HasAnnotation t ann
+     , HasAnnotation t ann
       , Unifiable t
-      , Plated1 t
-      , Ord1 t
-      , Ord v
-      , AsUnificationError e t v ann
-      , MonadError e m
-      )
+     , Plated1 t
+     , Ord1 t
+     , Ord v
+     , AsUnificationError e t v ann
+     , MonadError e m
+     )
   => UTerm t v
   -> UTerm t v
   -> UnifyT t v m ()

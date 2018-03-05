@@ -262,7 +262,7 @@ class Unifiable term where
   -- @
   --
   -- Must obey the law:
-  -- @forall t u. toplevelEqual t u ==> lengthOf plated t == lengthOf plated u@
+  -- @forall t u. toplevelEqual t u ==> lengthOf plate1 t == lengthOf plate1 u@
   -- i.e. top-level equal terms must have the same number of children
   --
   -- Should obey the law:

@@ -262,11 +262,11 @@ class Unifiable term where
   -- @
   --
   -- Must obey the law:
-  -- @forall t u. toplevelEqual t u ==> lengthOf plate1 t == lengthOf plate1 u@
+  -- @forall t u. toplevelEqual t u ==> 'lengthOf' 'plate1' t == 'lengthOf' 'plate1' u@
   -- i.e. top-level equal terms must have the same number of children
   --
   -- Should obey the law:
-  -- @forall t u. (null (t ^.. plated) || null (u ^.. plated)) ==> not (toplevelEqual t u)@
+  -- @forall t u. 'hasn't' 'plate1' t || 'hasn't' 'plate1' u ==> 'not' (toplevelEqual t u)@
   -- i.e. a term with no children should not be top-level equal to another
   -- term
   toplevelEqual :: term a -> term a -> Bool

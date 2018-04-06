@@ -288,5 +288,5 @@ class AsUnificationError e term var ann | e -> term var ann where
 class HasAnnotation term ann | term -> ann where
   annotation :: Lens' (term a) ann
 
-  default annotation :: Lens' (term a) ()
+  default annotation :: (ann ~ ()) => Lens' (term a) ann
   annotation = lens (const ()) const

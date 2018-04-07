@@ -21,6 +21,7 @@ module Control.Monad.Unify
   , UTerm
   , uterm
     -- * Operations
+  , freshVar
   , fresh
   , occurs
   , union
@@ -51,7 +52,7 @@ import Data.Functor.Compose
 import Data.Equivalence.Monad
 import Data.Foldable hiding (find)
 
--- | Unification variables. Use 'fresh' to obtain new 'UVar's
+-- | Unification variables. Use 'freshVar' and 'fresh' to obtain new 'UVar's
 newtype UVar = UVar Int deriving (Eq, Show, Ord)
 
 -- | Unification terms. Convert terms into unification terms using 'unfreeze',
@@ -149,11 +150,15 @@ instance MonadTrans (UnifyT t v) where
   lift m = UnifyT $ lift (E $ lift m)
 
 -- | Generate a fresh 'UVar'
-fresh :: Monad m => UnifyT t v m UVar
-fresh = UnifyT $ do
+freshVar :: Monad m => UnifyT t v m UVar
+freshVar = UnifyT $ do
   count <- get
   put $! count+1
   pure $ UVar count
+  
+-- | Generate a fresh 'UVar' wrapped in a 'UTerm'
+fresh :: (Monad m, AsVar t) => UnifyT t v m (UTerm t v)
+fresh = (from uterm._Var._Left #) <$> freshVar
 
 -- | Unify two terms
 unify

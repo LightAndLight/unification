@@ -207,7 +207,9 @@ find a = do
 
 -- | Check whether or not a 'UVar' is present in a term
 occurs :: (AsVar t, Plated1 t) => UVar -> UTerm t a -> Bool
-occurs n t = n `elem` (t ^.. from uterm.cosmos1._Var._Left)
+occurs n t =
+  not (t ^? from uterm._Var._Left == Just n) &&
+  n `elem` (t ^.. from uterm.cosmos1._Var._Left)
 
 runUnifyT :: (AsVar t, Monad m, Plated1 t) => UnifyT t v m res -> m res
 runUnifyT a = runEquivT id combine (getE . flip evalStateT 0 $ runUnifyT' a)

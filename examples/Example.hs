@@ -39,9 +39,15 @@ instance Monad Ty where
 
 do_it :: Either (UnificationError Ty String ()) (Maybe (Ty String))
 do_it = runUnifyT $ do
-  a <- fresh
-  b <- fresh
-  let t1 = view uterm $ TyArr (TyVar $ Right "a") (TyArr (TyVar $ Left b) $ TyVar $ Left a)
-  let t2 = view uterm $ TyArr (TyVar $ Left a) (TyArr (TyVar $ Left a) $ TyVar $ Right "a")
+  a <- freshVar
+  b <- freshVar
+  let
+    t1, t2 :: UTerm Ty String
+    t1 =
+      view uterm $
+      TyArr (TyVar $ Right "a") (TyArr (TyVar $ Left b) $ TyVar $ Left a)
+    t2 =
+      view uterm $
+      TyArr (TyVar $ Left a) (TyArr (TyVar $ Left a) $ TyVar $ Left b)
   unify t1 t2
   freeze t1

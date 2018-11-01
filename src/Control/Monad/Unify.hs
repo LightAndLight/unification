@@ -155,7 +155,7 @@ freshVar = UnifyT $ do
   count <- get
   put $! count+1
   pure $ UVar count
-  
+
 -- | Generate a fresh 'UVar' wrapped in a 'UTerm'
 fresh :: (Monad m, AsVar t) => UnifyT t v m (UTerm t v)
 fresh = (from uterm._Var._Left #) <$> freshVar
@@ -163,8 +163,9 @@ fresh = (from uterm._Var._Left #) <$> freshVar
 -- | Unify two terms
 unify
   :: ( AsVar t
+     , Foldable t
      , HasAnnotation t ann
-      , Unifiable t
+     , Unifiable t
      , Plated1 t
      , Ord1 t
      , Ord v
@@ -178,7 +179,10 @@ unify m n = do
   a <- view (from uterm) <$> find m
   b <- view (from uterm) <$> find n
   if toplevelEqual a b
-    then traverse_ (uncurry . on unify $ view uterm) (zip (a ^.. plate1) (b ^.. plate1))
+    then
+      traverse_
+        (uncurry . on unify $ view uterm)
+        (zip (a ^.. plate1) (b ^.. plate1))
     else
       case (a ^? _Var, b ^? _Var) of
         (Just (Left a'), _)
@@ -211,12 +215,11 @@ find a = do
       (repr ^. from uterm)
 
 -- | Check whether or not a 'UVar' is present in a term
-occurs :: (AsVar t, Plated1 t) => UVar -> UTerm t a -> Bool
+occurs :: (Foldable t, Plated1 t) => UVar -> UTerm t a -> Bool
 occurs n t =
-  not (t ^? from uterm._Var._Left == Just n) &&
-  n `elem` (t ^.. from uterm.cosmos1._Var._Left)
+  n `elem` (t ^.. from uterm.folded._Left)
 
-runUnifyT :: (AsVar t, Monad m, Plated1 t) => UnifyT t v m res -> m res
+runUnifyT :: (Foldable t, AsVar t, Monad m) => UnifyT t v m res -> m res
 runUnifyT a = runEquivT id combine (getE . flip evalStateT 0 $ runUnifyT' a)
   where
     combine u v =
@@ -225,8 +228,8 @@ runUnifyT a = runEquivT id combine (getE . flip evalStateT 0 $ runUnifyT' a)
         Nothing -> case v ^? from uterm._Var._Left of
           Just{} -> u
           Nothing
-            | lengthOf (from uterm.plate1._Var._Left) u <
-              lengthOf (from uterm.plate1._Var._Left) v -> u
+            | lengthOf (from uterm.folded._Left) u <
+              lengthOf (from uterm.folded._Left) v -> u
 
 -- | Convert a term into a unifiable term
 unfreeze :: Functor t => t v -> UTerm t v
@@ -235,7 +238,7 @@ unfreeze = UTerm . Compose . fmap Right
 -- | Attempt to convert a unifiable term into a regular term. Produces a 'Nothing' if
 -- the term still contains unsolved unification variables
 freeze
-  :: ( AsVar t 
+  :: ( AsVar t
      , Monad m
      , Ord1 t
      , Ord v
@@ -252,9 +255,9 @@ freeze = fmap (fmap join . sequence) . go . view (from uterm)
         Right a -> pure . Just $ _Var # a
         _ -> do
           r <- find (view uterm $ _Var # x)
-          case r ^.. from uterm.cosmos1._Var._Left of
-            [] -> freeze r
-            _ -> pure Nothing
+          if nullOf (from uterm.folded._Left) r
+            then freeze r
+            else pure Nothing
 
 -- | Terms that can be unified
 class Unifiable term where

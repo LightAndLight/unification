@@ -71,6 +71,12 @@ instance Monad t => Monad (UTerm t) where
       Left e -> pure $ Left e
       Right a -> getCompose . getUTerm $ f a
 
+instance Plated1 t => Plated1 (UTerm t) where
+  plate1 f =
+    fmap (view uterm) .
+    plate1 (fmap (^. from uterm) .  f . view uterm) .
+    view (from uterm)
+
 -- | 'Iso'' on 'UTerm's.
 --
 -- @'view' ('from' 'uterm') :: 'UTerm' t v -> t ('Either' 'UVar' v)@
@@ -207,12 +213,7 @@ find
   => UTerm t v -> UnifyT t v m (UTerm t v)
 find a = do
   repr <- UnifyT $ lift $ E (classDesc a)
-  (^. uterm) <$>
-    -- HELP ME
-    traverseOf
-      plate1
-      (fmap (^. from uterm) . find . (^. uterm))
-      (repr ^. from uterm)
+  traverseOf plate1 find repr
 
 -- | Check whether or not a 'UVar' is present in a term
 occurs :: (Foldable t, Plated1 t) => UVar -> UTerm t a -> Bool

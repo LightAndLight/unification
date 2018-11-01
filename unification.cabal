@@ -15,6 +15,11 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Control.Monad.Unify
                      , Control.Lens.Plated1
-  build-depends:       base >=4.9 && <4.10, equivalence, mtl, lens, deriving-compat
+  build-depends:       base >=4.9 && <4.10
+                     , equivalence
+                     , mtl
+                     , lens
+                     , deriving-compat
+                     , bound
   hs-source-dirs:      src
   default-language:    Haskell2010
